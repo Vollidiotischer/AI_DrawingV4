@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\SimpleAI">
+      <UniqueIdentifier>{80f34d99-67ca-408c-a02b-ca394a160486}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\MainComponents">
+      <UniqueIdentifier>{a84b3050-70f5-49f2-965f-8a88933b4f4f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="MainLoop.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Events.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="AIModule.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SimpleAI\AI_Instance.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleAI\AI_Manager.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleAI\AI_Utility.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleAI\AI_Variables.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleAI\Resource_Manager.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleAI\SimpleAI.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
+    <ClInclude Include="MainLoop.h">
+      <Filter>Headerdateien\MainComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Variables.h">
+      <Filter>Headerdateien\MainComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Events.h">
+      <Filter>Headerdateien\MainComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing.h">
+      <Filter>Headerdateien\MainComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="AIModule.h">
+      <Filter>Headerdateien\MainComponents</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
