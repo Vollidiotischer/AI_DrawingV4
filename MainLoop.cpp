@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <thread>
+#include <chrono>
 
 #include <SFML/Graphics.hpp>
 
@@ -77,7 +78,7 @@ namespace MainLoop {
 	void start_training(SimpleAI::AI_Manager& manager, std::vector<SimpleAI::Data_Point>& data, int iterations) {
 
 		//int iterations = 1; 
-		int batch_size = 240; 
+		int batch_size = 1; // 240
 		int num_data_splits = data.size() / batch_size; 
 
 		for (int i = 1; i <= iterations; i++) {
@@ -145,6 +146,8 @@ namespace MainLoop {
 			char c;
 			std::cin >> c;
 
+			std::chrono::milliseconds start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()); 
+
 			if (c == 'q') {
 				break;
 			}
@@ -168,12 +171,18 @@ namespace MainLoop {
 				manager.best_instance->print_error("\n");
 			}
 			if (c == 't') {
+
+
 				std::cout << "Number of Iterations: ";
 				std::cin >> c;
 
 				MainLoop::start_training(manager, data, (int)c - (int)'0');
 
 			}
+
+			std::chrono::milliseconds finish = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+			std::cout << "Operation took " << (finish - start).count() << "ms" << std::endl; 
 
 			notify_taskbar();
 

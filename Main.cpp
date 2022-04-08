@@ -13,39 +13,26 @@
 
 
 int main() {
-	
-	Eigen::MatrixX<DATA_TYPE> mtx;
-	mtx.resize(3, 2); 
-	std::cout << mtx(0, 1) << std::endl << std::endl;
-	std::cout << mtx << std::endl << std::endl;
-
-	Eigen::Matrix<float, 1, 2> vector = Eigen::Matrix<float, 1, 2>::Random(1, 2); 
-	Eigen::Matrix<float, 2, 2> matrix = Eigen::Matrix2f::Random(2, 2); 
-
-
-	std::cout << vector << "\n" << std::endl; 
-	std::cout << matrix << "\n" << std::endl;
-
-	Eigen::Matrix<float, 2, 1> vect2 = matrix * vector.transpose(); 
-
-	std::cout << vector << "\n" << std::endl;
-	std::cout << matrix << "\n" << std::endl;
-	std::cout << vect2 << "\n" << std::endl;
-
-	std::cout << matrix.size() << std::endl; 
-
-	std::cin.get(); 
-	
 
 	// load training data
 	std::vector<SimpleAI::Data_Point> data;
-	SimpleAI::Resource_Manager::load_mnist_data("Data/train-images.idx3-ubyte", "Data/train-labels.idx1-ubyte", data);
-
+	//SimpleAI::Resource_Manager::load_mnist_data("Data/train-images.idx3-ubyte", "Data/train-labels.idx1-ubyte", data);
+	SimpleAI::Resource_Manager::load_data("training_data.txt", data);
 
 	std::cout << "Size of Dataset: " << data.size() << std::endl; 
 
 	// train nn
-	SimpleAI::AI_Manager manager(5); 
+	SimpleAI::AI_Manager manager(1); // 5
+
+
+	for (int i = 0; i < manager.ai_list[0].neurons_z.size(); i++) {
+		std::cout << manager.ai_list[0].neurons_z[i].size() << std::endl;
+
+	}
+	for (int i = 0; i < manager.ai_list[0].neurons_a.size(); i++) {
+		std::cout << manager.ai_list[0].neurons_a[i].size() << std::endl;
+
+	}
 	
 	MainLoop::start_loop(manager, data); 
 
@@ -59,9 +46,8 @@ int main() {
 /*
 
 todo: 
-	implement multithreading
-
-	Bias kleiner machen ~ 0.1
+	!!! AVERAGE DELTA WEIGHT & BIAS APPLY !!!
+	apply_softmax_function maybe no need to copy
 
 try: 
 	try values between 0 and 1

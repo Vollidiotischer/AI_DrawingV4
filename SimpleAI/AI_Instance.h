@@ -43,13 +43,16 @@ namespace SimpleAI {
 		Weights is a List of num_layers - 1 matrices
 		weights[i] = std::vector<std::vector<Weight>>(ai_layout[i + 1], std::vector<Weight>(ai_layout[i], 0));
 		*/
-		std::array<std::vector<std::vector<Weight>>, num_layers - 1> weights;
-		std::array<std::vector<Bias>, num_layers - 1> biases;
-		std::array<std::vector<Neuron>, num_layers> neurons;
 
-		//std::array<Eigen::MatrixX<DATA_TYPE>, num_layers - 1> weights;
-		//std::array<std::vector<Bias>, num_layers - 1> biases;
-		//std::array<std::vector<Neuron>, num_layers> neurons;
+		std::array<Eigen::MatrixX<DATA_TYPE>, num_layers - 1> weights_current_weight;
+		std::array<Eigen::MatrixX<DATA_TYPE>, num_layers - 1> weights_delta_value;
+
+		std::array<Eigen::VectorX<DATA_TYPE>, num_layers - 1> biases_current_bias;
+		std::array<Eigen::VectorX<DATA_TYPE>, num_layers - 1> biases_delta_value;
+
+		std::array<Eigen::VectorX<DATA_TYPE>, num_layers> neurons_a;
+		std::array<Eigen::VectorX<DATA_TYPE>, num_layers> neurons_z;
+		std::array<Eigen::VectorX<DATA_TYPE>, num_layers> neurons_delta;
 
 		DATA_TYPE error = 0.f; 
 
@@ -60,7 +63,10 @@ namespace SimpleAI {
 
 			// initialize neurons
 			for (int i = 0; i < num_layers; i++) {
-				neurons[i].resize(ai_layout[i]);
+				neurons_a[i].resize(ai_layout[i]); 
+				neurons_z[i].resize(ai_layout[i]); 
+				neurons_delta[i].resize(ai_layout[i]); 
+
 			}
 
 
@@ -69,10 +75,12 @@ namespace SimpleAI {
 
 			// initialize biases
 			init_biases();
+
 		}
 
-
+		// todo
 		void print_instance() {
+			/*
 			std::cout << "Status of the ai: " << std::endl;
 			for (int i = 0; i < neurons.size(); i++) {
 
@@ -122,6 +130,7 @@ namespace SimpleAI {
 			}
 
 			std::cout << "]" << std::endl;
+			*/
 		}
 
 		void print_error(std::string app = "") {
@@ -129,14 +138,16 @@ namespace SimpleAI {
 		}
 
 		void init_weights() {
-			for (int i = 0; i < weights.size(); i++) {
+			for (int i = 0; i < weights_current_weight.size(); i++) {
 				// number of rows in the matrix (one row for each neuron in the following layer) 
-				weights[i] = std::vector<std::vector<Weight>>(ai_layout[i + 1], std::vector<Weight>(ai_layout[i], 0));
-
+				weights_current_weight[i] = Eigen::MatrixX<DATA_TYPE>(ai_layout[i+1], ai_layout[i]); 
+				weights_delta_value[i] = Eigen::MatrixX<DATA_TYPE>(ai_layout[i+1], ai_layout[i]); 
+				
 				// Initialize weights to random value
-				for (int i2 = 0; i2 < weights[i].size(); i2++) {
-					for (int i3 = 0; i3 < weights[i][i2].size(); i3++) {
-						weights[i][i2][i3].current_weight = rd.get_random_number() / sqrt((DATA_TYPE)neurons[i].size());
+				for (int i2 = 0; i2 < weights_current_weight[i].rows(); i2++) {
+					for (int i3 = 0; i3 < weights_current_weight[i].cols(); i3++) {
+						weights_current_weight[i](i2, i3) = rd.get_random_number() / sqrt((DATA_TYPE)ai_layout[i]);
+					
 					}
 				}
 
@@ -144,34 +155,29 @@ namespace SimpleAI {
 		}
 
 		void init_biases() {
-			for (int i = 0; i < biases.size(); i++) {
-				biases[i] = std::vector<Bias>(ai_layout[i + 1], 0);
+			for (int i = 0; i < biases_current_bias.size(); i++) {
+				biases_current_bias[i] = Eigen::VectorX<DATA_TYPE>(ai_layout[i+1]); 
+				biases_delta_value[i] = Eigen::VectorX<DATA_TYPE>(ai_layout[i+1]); 
 
 				// Initialize to random Value
-				for (int i2 = 0; i2 < biases[i].size(); i2++) {
-					biases[i][i2].current_bias = rd.get_random_number();
+				for (int i2 = 0; i2 < biases_current_bias[i].size(); i2++) {
+					biases_current_bias[i](i2) = rd.get_random_number(); 
 				}
 			}
 		}
 
-		static void clear_weight_delta_value(std::array<std::vector<std::vector<Weight>>, num_layers - 1>& weights) {
+		static void clear_weight_delta_value(std::array<Eigen::MatrixX<DATA_TYPE>, num_layers - 1>& weights_delta_change) {
 
-			for (auto& w1 : weights) {
-				for (auto& w2 : w1) {
-					for (auto& w3 : w2) {
-						w3.delta_change = 0.f;
-					}
-				}
+			for (auto& w1 : weights_delta_change) {
+				w1.setZero(); 
 			}
 
 		}
 
-		static void clear_biases_delta_value(std::array<std::vector<Bias>, num_layers - 1>& biases) {
+		static void clear_biases_delta_value(std::array<Eigen::VectorX<DATA_TYPE>, num_layers - 1>& biases_delta_change) {
 
-			for (auto& b1 : biases) {
-				for (auto& b2 : b1) {
-					b2.delta_change = 0.f;
-				}
+			for (auto& b1 : biases_delta_change) {
+				b1.setZero();
 			}
 
 		}
@@ -202,33 +208,41 @@ namespace SimpleAI {
 
 		static void evaluate_input(AI_Instance& ai, const std::array<DATA_TYPE, ai_layout[0]>& data /* IN */, std::array<DATA_TYPE, ai_layout[num_layers - 1]>& result /* OUT */) {
 
-			if (data.size() != ai.neurons[0].size()) {
-				fprintf(stderr, "Data size (%d) does not match Input Layer size (%d) [Line %d in function '%s']", data.size(), ai.neurons[0].size(), __LINE__, __func__);
+			if (data.size() != ai.neurons_a[0].size()) {
+				fprintf(stderr, "Data size (%d) does not match Input Layer size (%d) [Line %d in function '%s']", data.size(), ai.neurons_a[0].size(), __LINE__, __func__);
 				system("pause");
 				exit(1);
 			}
 
 			// copy data to neurons (may be optimised out)
-			for (int i2 = 0; i2 < ai.neurons[0].size(); i2++) {
-				ai.neurons[0][i2].a = data[i2];
+			for (int i2 = 0; i2 < ai.neurons_a[0].size(); i2++) {
+				ai.neurons_a[0](i2) = data[i2];
 			}
 
 			// Feed data to AI
 			for (int i = 0; i < num_layers - 1; i++) {
-				zero_out(ai.neurons[i + 1]);
-				matrix_vector_multiply(ai.neurons[i], ai.weights[i], ai.neurons[i + 1]);
-				vect_vect_add(ai.neurons[i + 1], ai.biases[i]);
+
+				ai.neurons_a[i].setZero(); 
+				ai.neurons_z[i].setZero(); 
+				//zero_out(ai.neurons[i + 1]);
+
+				//matrix_vector_multiply(ai.neurons[i], ai.weights[i], ai.neurons[i + 1]);
+				ai.neurons_z[i + 1] = ai.weights_current_weight[i] * ai.neurons_a[i]; 
+
+				//vect_vect_add(ai.neurons[i + 1], ai.biases[i]);
+				ai.neurons_z[i + 1] = ai.neurons_z[i + 1] + ai.biases_current_bias[i]; 
+
 				if (i == num_layers - 2) { // output layer -> softmax
-					apply_softmax_function(ai.neurons[i + 1]);
+					apply_softmax_function(ai.neurons_z[i + 1], ai.neurons_a[i +1 ]);
 				}
 				else { // hidden layer -> ReLU
-					apply_activation_function(ai.neurons[i + 1]);
+					apply_activation_function(ai.neurons_z[i + 1], ai.neurons_a[i + 1]);
 				}
 			}
 
 			// Copy elements from last neuron layer to result vector (may be optimised out)
 			for (int i = 0; i < result.size(); i++) {
-				result[i] = ai.neurons.back()[i].a;
+				result[i] = ai.neurons_a.back()(i); 
 			}
 
 		}
@@ -238,11 +252,13 @@ namespace SimpleAI {
 			ai.error = 0.f;
 
 			// clear weight delta values
-			clear_weight_delta_value(ai.weights);
+			clear_weight_delta_value(ai.weights_delta_value);
 			// clear bias delta values
-			clear_biases_delta_value(ai.biases);
+			clear_biases_delta_value(ai.biases_delta_value);
+
 
 			for (int i = start_index; i < end_index; i++) {
+
 				feed_forward_step(ai, data_list[i]);
 
 				backprop_step(ai, data_list[i]);
@@ -252,20 +268,15 @@ namespace SimpleAI {
 			float data_size = end_index - start_index;
 
 			// apply delta_weight changes
-			for (auto& w1 : ai.weights) {
-				for (auto& w2 : w1) {
-					for (auto& w3 : w2) {
-						w3.current_weight += ai.learn_factor * (w3.delta_change / data_size);
-					}
-				}
+			for (int i = 0; i < ai.weights_current_weight.size(); i++) {
+				ai.weights_current_weight[i] = ai.weights_current_weight[i] + ai.weights_delta_value[i];
+
 			}
 
 
 			// apply delta_bias changes
-			for (auto& b1 : ai.biases) {
-				for (auto& b2 : b1) {
-					b2.current_bias += ai.learn_factor * (b2.delta_change / data_size);
-				}
+			for (int i = 0; i < ai.biases_current_bias.size(); i++) {
+				ai.biases_current_bias[i] = ai.biases_current_bias[i] + ai.biases_delta_value[i]; 
 			}
 
 			// average out the error
@@ -286,58 +297,56 @@ namespace SimpleAI {
 					2.2. Calculate delta Weight for all remaining Weights
 					2.3. Caluclate delta Biases for all remaining Biases
 			
-
+			
 			Delta Weight Formula: delta_weight = (epsilon) * (delta) * (activation of previous layer)
 			*/
 
+			// convert Data_Point result array to Eigen Vector
+			Eigen::VectorX<DATA_TYPE> result_vect(data.result.size()); 
+			for (int i = 0; i < data.result.size(); i++) {
+				result_vect(i) = data.result[i]; 
+			}
+
 			// only runs through output layer and all hidden layers (not the input layer)
-			for (int i = ai.neurons.size() - 1; i > 0; i--) {
+			for (int i = num_layers - 1; i > 0; i--) {
+				
+				if (i == num_layers - 1) {
+					// output layer: (1)
 
-				// output layer: (1)
-				if (i == ai.neurons.size() - 1) {
+					// 1.1
+					ai.neurons_delta[i] = result_vect - ai.neurons_a[i]; // softmax with cross entropy
 
-					for (int i2 = 0; i2 < ai.neurons[i].size(); i2++) {
+					// 1.2
+					ai.weights_delta_value[i - 1] += ai.neurons_delta[i] * ai.neurons_a[i - 1].transpose();
 
-						// 1.1
-						ai.neurons[i][i2].delta_value = data.result[i2] - ai.neurons[i][i2].a; // softmax with cross entropy (softmax has been applied to the final layer, (result - prediction) is the equation for this activation function, cost function combination) 
-
-						// weights (1.2)
-						for (int i3 = 0; i3 < ai.neurons[i - 1].size(); i3++) {
-
-							ai.weights[i - 1][i2][i3].delta_change += ai.neurons[i][i2].delta_value * ai.neurons[i - 1][i3].a;
-
-						}
-
-						// biases (1.3) 
-						ai.biases[i - 1][i2].delta_change += ai.neurons[i][i2].delta_value;
-
-					}
+					// 1.3
+					ai.biases_delta_value[i - 1] += ai.neurons_delta[i]; 
 
 				}
 				else { // hidden layers: (2)
 
-					for (int i2 = 0; i2 < ai.neurons[i].size(); i2++) {
-						DATA_TYPE z_hid = ai.neurons[i][i2].z;
+					for (int i2 = 0; i2 < ai_layout[i]; i2++) {
+
+						DATA_TYPE z_hid = ai.neurons_z[i](i2);
 
 						// gather weight, delta neuron pairs for neuron delta value (2.1) 
-						std::vector<std::array<DATA_TYPE, 2>> delta_pairs;
 
-						for (int i3 = 0; i3 < ai.weights[i].size(); i3++) {
-							std::array<DATA_TYPE, 2> delta_pair = { ai.weights[i][i3][i2].current_weight, ai.neurons[i + 1][i3].delta_value };
-							delta_pairs.push_back(delta_pair);
+						DATA_TYPE sum = 0;
+						for (int i3 = 0; i3 < ai.weights_current_weight[i].rows(); i3++) {
+							sum += ai.weights_current_weight[i](i3, i2) * ai.neurons_delta[i + 1](i3);
 
 						}
+
 						// 2.1
-						ai.neurons[i][i2].delta_value = delta_function_hidden_layer(z_hid, delta_pairs);
+						ai.neurons_delta[i](i2) = delta_function_hidden_layer(z_hid, sum);
 
-						// weights (2.2)
-						for (int i3 = 0; i3 < ai.weights[i - 1][i2].size(); i3++) {
-							ai.weights[i - 1][i2][i3].delta_change += ai.neurons[i][i2].delta_value * ai.neurons[i - 1][i3].a;
-						}
-
-						// biases (2.3) 
-						ai.biases[i - 1][i2].delta_change += ai.neurons[i][i2].delta_value;
 					}
+					// weights (2.2)
+					ai.weights_delta_value[i - 1] += ai.neurons_delta[i] * ai.neurons_a[i - 1].transpose();
+
+					// biases (2.3) 
+					ai.biases_delta_value[i - 1] += ai.neurons_delta[i]; 
+
 
 				}
 
@@ -365,7 +374,7 @@ private:
 			return activation_function_derivative(z_hid) * der_of_cost_res;
 		}
 
-		static DATA_TYPE delta_function_hidden_layer(DATA_TYPE z_hid, std::vector<std::array<DATA_TYPE, 2>>& delta_pairs) {
+		static DATA_TYPE delta_function_hidden_layer(DATA_TYPE z_hid, DATA_TYPE sum) {
 
 			/*
 				IN:
@@ -378,12 +387,6 @@ private:
 			*/
 
 			DATA_TYPE delta = activation_function_derivative(z_hid);
-
-			DATA_TYPE sum = 0;
-
-			for (int i = 0; i < delta_pairs.size(); i++) {
-				sum += delta_pairs[i][0] * delta_pairs[i][1];
-			}
 
 			return delta * sum;
 		}
@@ -446,36 +449,30 @@ private:
 			}
 		}
 
-		static void apply_softmax_function(std::vector<Neuron>& inout) {
+		static void apply_softmax_function(Eigen::VectorX<DATA_TYPE> neurons_z, Eigen::VectorX<DATA_TYPE>& neurons_a) {
 
 			DATA_TYPE sum = 0;
 
+			// Find max element in neurons_z
+			DATA_TYPE max = neurons_z.maxCoeff();
 
-			DATA_TYPE max = inout[0].z;
 
-			for (int i = 0; i < inout.size(); i++) {
-				if (inout[i].z > max) {
-					max = inout[i].z;
-				}
+			for (int i = 0; i < neurons_z.size(); i++) {
+				neurons_z(i) = std::exp(neurons_z(i) - max);
+				sum += neurons_z(i);
 			}
 
-
-			for (int i = 0; i < inout.size(); i++) {
-				inout[i].z -= max;
-				sum += std::exp(inout[i].z);
-			}
-
-			for (int i = 0; i < inout.size(); i++) {
-				inout[i].a = (std::exp(inout[i].z) / sum);
+			for (int i = 0; i < neurons_z.size(); i++) {
+				neurons_a(i) = neurons_z(i) / sum;
 			}
 
 
 		}
 
-		static void apply_activation_function(std::vector<Neuron>& vect /*IN / OUT */) {
+		static void apply_activation_function(const Eigen::VectorX<DATA_TYPE>& neurons_z, Eigen::VectorX<DATA_TYPE>& neurons_a) {
 
-			for (int i = 0; i < vect.size(); i++) {
-				vect[i].a = activation_function(vect[i].z);
+			for (int i = 0; i < neurons_z.size(); i++) {
+				neurons_a(i) = activation_function(neurons_z(i));
 			}
 
 		}
