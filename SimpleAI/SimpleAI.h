@@ -6,6 +6,8 @@
 
 #include "AI_Instance.h"
 
+#include "AI_Functionality.h"
+
 #include "AI_Manager.h"
 
 #include "Resource_Manager.h"

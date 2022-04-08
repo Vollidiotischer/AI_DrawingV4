@@ -39,9 +39,18 @@ namespace AIModule {
 
 		std::array<float, SimpleAI::ai_layout[SimpleAI::num_layers - 1]> result; 
 
-		ai.evaluate_input(dp.data, result);
+		SimpleAI::AI_Instance::evaluate_input(ai, dp.data, result);
 
-		SimpleAI::println_array<float, SimpleAI::ai_layout[SimpleAI::num_layers - 1]>(result);
+		float max = 0; 
+		float max_index = 0; 
+		for (int i = 0; i < result.size(); i++) {
+			if (result[i] > max) {
+				max = result[i]; 
+				max_index = i; 
+			}
+		}
+
+		std::cout << "Guess:" << max_index << std::endl; 
 
 	}
 

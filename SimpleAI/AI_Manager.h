@@ -15,7 +15,6 @@ namespace SimpleAI {
 		AI_Instance *best_instance = NULL; 
 
 
-
 		AI_Manager(int num_instances) : num_instances(num_instances) {
 
 			srand(time(NULL)); 
@@ -31,42 +30,18 @@ namespace SimpleAI {
 
 		}
 
-		void train_all_instances(std::vector<Data_Point>& data, int batch_size) {
+		void train_all_instances(std::vector<Data_Point>& data, int start, int end) {
 			
-			std::vector<int> indices(batch_size); 
+			//std::vector<int> indices(batch_size); 
 
-			get_random_indeces(indices, data.size()); 
+			//get_random_indeces(indices, data.size()); 
 
 			for (int i2 = 0; i2 < ai_list.size(); i2++) {
-				ai_list[i2].backprop(data, indices);
+				AI_Instance::backprop(ai_list[i2], data, start, end);
 			}
 
 
 		}
-		/*
-		void train_all_instances(std::vector<Data_Point>& data, DATA_TYPE goal_percent) {
-
-			goal_percent /= 100.f;
-
-			DATA_TYPE minimum = 1.f; 
-
-			while (minimum > goal_percent){
-				for (int i2 = 0; i2 < ai_list.size(); i2++) {
-
-					ai_list[i2].backprop(data);
-
-					if (ai_list[i2].error < minimum) {
-						minimum = ai_list[i2].error;
-						std::cout.precision(4); 
-						std::cout << "Error: " << minimum * 100.f << "% / " << goal_percent * 100.f << "%" << std::endl;
-
-					} 
-				}
-
-			}
-
-		}
-		*/
 
 		void reshuffel_instances() {
 
@@ -85,7 +60,7 @@ namespace SimpleAI {
 			for (int i = 0; i < num_instances; i++) {
 				std::cout << "Instance: " << i << "/" << num_instances << std::endl;
 				// evaluate data for each ai instance, internally set error variable
-				ai_list[i].evaluate_input_list(data); 
+				AI_Instance::evaluate_input_list(ai_list[i], data);
 
 			}
 

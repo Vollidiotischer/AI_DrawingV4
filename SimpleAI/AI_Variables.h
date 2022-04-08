@@ -17,13 +17,13 @@ ai_layout:
 
 namespace SimpleAI {
 
-	constexpr int num_layers = 5;
-	constexpr std::array<int, num_layers> ai_layout = { 784, 512, 256, 128, 10 };
+	constexpr int num_layers = 6;
+	constexpr std::array<int, num_layers> ai_layout = { 784, 512, 256, 128, 20, 10 };
 
 	constexpr DATA_TYPE ai_learn_factor = 0.01f;
 
-	constexpr float erwartungswert = 0.0f;
-	constexpr float standardabweichung = 2.f;
+	constexpr float erwartungswert = 0.f;
+	constexpr float standardabweichung = 3.f;
 
 
 	struct Data_Point {

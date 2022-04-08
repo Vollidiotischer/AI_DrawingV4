@@ -71,5 +71,8 @@
     <ClInclude Include="AIModule.h">
       <Filter>Headerdateien\MainComponents</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleAI\AI_Functionality.h">
+      <Filter>Headerdateien\SimpleAI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -76,6 +76,7 @@ namespace SimpleAI {
 			if (ai_size[0] != ai_layout[0] || ai_size[1] != ai_layout[num_layers - 1]) {
 
 				fprintf(stderr, "AI size in Text file %s and in source code does not match(%d:%d and %d:%d) [Line %d in function '%s']", path.c_str(), (int)ai_size[0], (int)ai_size[1], ai_layout[0], ai_layout[num_layers - 1], __LINE__, __func__);
+				system("pause");
 				exit(1);
 			}
 
@@ -110,6 +111,7 @@ namespace SimpleAI {
 			}
 			else {
 				fprintf(stderr, "Text File '%s' could not be opened [Line %d in function '%s']", path.c_str(), __LINE__, __func__); 
+				system("pause");
 				exit(1); 
 			}
 
@@ -150,11 +152,13 @@ namespace SimpleAI {
 			 
 			if (dash_pos == std::string::npos && colon_pos != std::string::npos) {
 				fprintf(stderr, "Tried to find Data-Size in wrong data-parse function (txt line %d) [Line %d in function '%s']", line, __LINE__, __func__);
+				system("pause");
 				exit(1); 
 			}
 
 			if (dash_pos == std::string::npos && colon_pos == std::string::npos) {
 				fprintf(stderr, "Invalid string input (txt line %d) [Line %d in function '%s']", line, __LINE__, __func__);
+				system("pause");
 				exit(1); 
 			}
 
@@ -189,6 +193,7 @@ namespace SimpleAI {
 			else {
 				// error and exit
 				fprintf(stderr, "Text File '%s' could not be opened [Line %d in function '%s']", path.c_str(), __LINE__, __func__);
+				system("pause");
 				exit(1);
 			}
 		}
