@@ -14,6 +14,11 @@
 
 int main() {
 	
+	Eigen::MatrixX<DATA_TYPE> mtx;
+	mtx.resize(3, 2); 
+	std::cout << mtx(0, 1) << std::endl << std::endl;
+	std::cout << mtx << std::endl << std::endl;
+
 	Eigen::Matrix<float, 1, 2> vector = Eigen::Matrix<float, 1, 2>::Random(1, 2); 
 	Eigen::Matrix<float, 2, 2> matrix = Eigen::Matrix2f::Random(2, 2); 
 

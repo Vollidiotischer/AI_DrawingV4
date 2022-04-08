@@ -7,6 +7,9 @@
 #include <random>
 #include <time.h>
 
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
 #include "AI_Variables.h"
 #include "AI_Functionality.h"
 
@@ -38,11 +41,15 @@ namespace SimpleAI {
 		/*
 
 		Weights is a List of num_layers - 1 matrices
-
+		weights[i] = std::vector<std::vector<Weight>>(ai_layout[i + 1], std::vector<Weight>(ai_layout[i], 0));
 		*/
 		std::array<std::vector<std::vector<Weight>>, num_layers - 1> weights;
 		std::array<std::vector<Bias>, num_layers - 1> biases;
 		std::array<std::vector<Neuron>, num_layers> neurons;
+
+		//std::array<Eigen::MatrixX<DATA_TYPE>, num_layers - 1> weights;
+		//std::array<std::vector<Bias>, num_layers - 1> biases;
+		//std::array<std::vector<Neuron>, num_layers> neurons;
 
 		DATA_TYPE error = 0.f; 
 
