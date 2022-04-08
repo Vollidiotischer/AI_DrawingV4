@@ -13,7 +13,7 @@
 
 
 int main() {
-	
+	/*
 	Eigen::Matrix<float, 1, 2> vector = Eigen::Matrix<float, 1, 2>::Random(1, 2); 
 	Eigen::Matrix<float, 2, 2> matrix = Eigen::Matrix2f::Random(2, 2); 
 
@@ -30,7 +30,7 @@ int main() {
 	std::cout << matrix.size() << std::endl; 
 
 	std::cin.get(); 
-	
+	*/
 
 	// load training data
 	std::vector<SimpleAI::Data_Point> data;
