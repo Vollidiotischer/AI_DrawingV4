@@ -75,10 +75,46 @@ namespace MainLoop {
 
 	}
 
-	void start_training(SimpleAI::AI_Manager& manager, std::vector<SimpleAI::Data_Point>& data, int iterations) {
+	void train_instance(SimpleAI::AI_Instance& ai, std::vector<SimpleAI::Data_Point>& data, int iterations, bool should_print) {
+		int batch_size = 240; // 240
+		int num_data_splits = data.size() / batch_size;
 
+
+		for (int i = 1; i <= iterations; i++) {
+
+			for (int i2 = 0; i2 < num_data_splits; i2++) {
+
+				SimpleAI::AI_Instance::backprop(ai, data, i2 * batch_size, (i2 + 1) * batch_size);
+
+				if (should_print) {
+					std::cout << "Training: " << i2 + 1 << "/" << num_data_splits << " (" << i << "/" << iterations << ")" << std::endl;
+				}
+			}
+
+			if (std::isnan(ai.error) || std::isnan(-ai.error)) {
+				ai = SimpleAI::AI_Instance(SimpleAI::ai_learn_factor);
+			}
+
+
+
+		}
+
+	}
+
+	void start_training(SimpleAI::AI_Manager& manager, std::vector<SimpleAI::Data_Point>& data, int iterations) {
+		
+		std::vector<std::thread> _threads;
+
+		for (int i = 0; i < manager.ai_list.size(); i++) {
+			_threads.push_back(std::thread(train_instance, std::ref(manager.ai_list[i]), std::ref(data), iterations, i == 0)); 
+		}
+
+		for (auto& t : _threads) {
+			t.join();
+		}
+		/*
 		//int iterations = 1; 
-		int batch_size = 1; // 240
+		int batch_size = 240; // 240
 		int num_data_splits = data.size() / batch_size; 
 
 		for (int i = 1; i <= iterations; i++) {
@@ -106,34 +142,8 @@ namespace MainLoop {
 
 			}
 
-			/*
-			// reshuffle 
-			if (i % 2 == 0) {
-				if (i == 0) {
-					continue;
-				}
-				std::vector<std::thread> threads;
-
-				for (int i = 0; i < manager.ai_list.size(); i++) {
-					threads.push_back(std::thread(SimpleAI::AI_Instance::evaluate_input_list_mt, std::ref(manager.ai_list[i]), std::ref(data)));
-				}
-
-				for (auto& t : threads) {
-					t.join();
-				}
-
-				manager.calculate_best_instance();
-				manager.best_instance->print_error("\n");
-				manager.reshuffel_instances();
-
-				for (int index = 0; index < manager.ai_list.size(); index++) {
-					if (std::isnan(manager.ai_list[index].error) || std::isnan(-manager.ai_list[index].error)) {
-						manager.ai_list[index] = SimpleAI::AI_Instance(SimpleAI::ai_learn_factor);
-					}
-				}
-			}
-			*/
 		}
+		*/
 
 	}
 
@@ -169,12 +179,17 @@ namespace MainLoop {
 				manager.calculate_best_instance();
 
 				manager.best_instance->print_error("\n");
+
+				manager.reshuffel_instances();
+
 			}
 			if (c == 't') {
 
 
 				std::cout << "Number of Iterations: ";
 				std::cin >> c;
+
+				start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 				MainLoop::start_training(manager, data, (int)c - (int)'0');
 

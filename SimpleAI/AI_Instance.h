@@ -224,12 +224,9 @@ namespace SimpleAI {
 
 				ai.neurons_a[i].setZero(); 
 				ai.neurons_z[i].setZero(); 
-				//zero_out(ai.neurons[i + 1]);
 
-				//matrix_vector_multiply(ai.neurons[i], ai.weights[i], ai.neurons[i + 1]);
 				ai.neurons_z[i + 1] = ai.weights_current_weight[i] * ai.neurons_a[i]; 
 
-				//vect_vect_add(ai.neurons[i + 1], ai.biases[i]);
 				ai.neurons_z[i + 1] = ai.neurons_z[i + 1] + ai.biases_current_bias[i]; 
 
 				if (i == num_layers - 2) { // output layer -> softmax
@@ -265,18 +262,18 @@ namespace SimpleAI {
 
 			}
 
-			float data_size = end_index - start_index;
+			DATA_TYPE factor = ai.learn_factor / (end_index - start_index);
 
 			// apply delta_weight changes
 			for (int i = 0; i < ai.weights_current_weight.size(); i++) {
-				ai.weights_current_weight[i] = ai.weights_current_weight[i] + ai.weights_delta_value[i];
+				ai.weights_current_weight[i] += ai.weights_delta_value[i] * factor;
 
 			}
 
 
 			// apply delta_bias changes
 			for (int i = 0; i < ai.biases_current_bias.size(); i++) {
-				ai.biases_current_bias[i] = ai.biases_current_bias[i] + ai.biases_delta_value[i]; 
+				ai.biases_current_bias[i] += ai.biases_delta_value[i] * factor;
 			}
 
 			// average out the error
@@ -327,8 +324,6 @@ namespace SimpleAI {
 
 					for (int i2 = 0; i2 < ai_layout[i]; i2++) {
 
-						DATA_TYPE z_hid = ai.neurons_z[i](i2);
-
 						// gather weight, delta neuron pairs for neuron delta value (2.1) 
 
 						DATA_TYPE sum = 0;
@@ -338,7 +333,7 @@ namespace SimpleAI {
 						}
 
 						// 2.1
-						ai.neurons_delta[i](i2) = delta_function_hidden_layer(z_hid, sum);
+						ai.neurons_delta[i](i2) = delta_function_hidden_layer(ai.neurons_z[i](i2), sum);
 
 					}
 					// weights (2.2)

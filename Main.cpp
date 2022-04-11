@@ -16,23 +16,13 @@ int main() {
 
 	// load training data
 	std::vector<SimpleAI::Data_Point> data;
-	//SimpleAI::Resource_Manager::load_mnist_data("Data/train-images.idx3-ubyte", "Data/train-labels.idx1-ubyte", data);
-	SimpleAI::Resource_Manager::load_data("training_data.txt", data);
+	SimpleAI::Resource_Manager::load_mnist_data("Data/train-images.idx3-ubyte", "Data/train-labels.idx1-ubyte", data);
+	//SimpleAI::Resource_Manager::load_data("training_data.txt", data);
 
 	std::cout << "Size of Dataset: " << data.size() << std::endl; 
 
 	// train nn
-	SimpleAI::AI_Manager manager(1); // 5
-
-
-	for (int i = 0; i < manager.ai_list[0].neurons_z.size(); i++) {
-		std::cout << manager.ai_list[0].neurons_z[i].size() << std::endl;
-
-	}
-	for (int i = 0; i < manager.ai_list[0].neurons_a.size(); i++) {
-		std::cout << manager.ai_list[0].neurons_a[i].size() << std::endl;
-
-	}
+	SimpleAI::AI_Manager manager(5); // 5
 	
 	MainLoop::start_loop(manager, data); 
 

@@ -9,4 +9,6 @@ namespace MainLoop {
 
 	void start_loop(SimpleAI::AI_Manager&, std::vector<SimpleAI::Data_Point>&);
 
+	void train_instance(SimpleAI::AI_Instance&, std::vector<SimpleAI::Data_Point>&, int, bool);
+
 }
